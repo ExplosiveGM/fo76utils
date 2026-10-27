@@ -355,6 +355,8 @@ void ESMDump::convertField(std::string& s,
       sizeRequired = 2;
     else if (c == 'l' && !(esmFlags & 0x80))
       c = 'z';
+    else if (c == 'r')
+      sizeRequired = 0;
     else if ((unsigned char) c > 'c' && c != 'z' && c != 'n')
       sizeRequired = 4;
     if ((f.getPosition() + sizeRequired) > f.size())
@@ -410,6 +412,17 @@ void ESMDump::convertField(std::string& s,
         break;
       case '.':
         (void) f.readUInt8Fast();
+        break;
+      case 'r':
+        {
+          static const char  hexDigits[] = "0123456789ABCDEF";
+          while (f.getPosition() < f.size())
+          {
+            unsigned char  b = f.readUInt8();
+            s += hexDigits[b >> 4];
+            s += hexDigits[b & 0x0F];
+          }
+        }
         break;
       default:
         errorMessage("invalid data type in field definition");
